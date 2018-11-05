@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/bot_player"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/player"
+        android:tag="bot.player" />
+
+    <ImageView
+        android:id="@+id/bot_monster"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/monster_red"
+        android:tag="bot.monster_red"
+        android:translationX="200dp" />
+
+    <LinearLayout
+        android:id="@+id/panel_floors"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true"
+        android:showDividers="middle"
+        android:divider="@drawable/empty_tall_divider"
+        android:paddingBottom="100dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/floortile"
+                android:tag="bot.floor" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/floortile"
+                android:layout_marginLeft="50dp"
+                android:tag="bot.floor" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/floortile_medium"
+                android:translationX="100dp"
+                android:tag="bot.floor" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/floortile_large"
+                android:translationX="200dp"
+                android:tag="bot.floor" />
+
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

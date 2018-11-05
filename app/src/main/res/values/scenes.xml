@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!-- Lists the layout names of each level in the game, in the order they are played.
+     Level Zero is the "Intro" level displaying the Start Button
+-->
+    <string-array name="scene_layouts" >
+        <item>level_one</item>
+    </string-array>
+</resources>

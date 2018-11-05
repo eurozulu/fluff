@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bots>
+    <bot
+        id="player"
+        class="org.spoofer.fluff.game.SimpleBot">
+        <actions>
+            <action name="stop">
+                <frame>player</frame>
+            </action>
+            <action name="left">
+                <frame>player_left1</frame>
+                <frame>player_left2</frame>
+                <frame>player_left3</frame>
+            </action>
+            <action name="right">
+                <frame>player_right1</frame>
+                <frame>player__right2</frame>
+                <frame>player__right3</frame>
+            </action>
+            <action name="up">
+                <frame>player_up1</frame>
+                <frame>player_up2</frame>
+                <frame>player_up3</frame>
+            </action>
+            <action name="down">
+                <frame>player_down1</frame>
+                <frame>player_down2</frame>
+                <frame>player_down3</frame>
+            </action>
+        </actions>
+    </bot>
+    <bot
+        id="monster_red"
+        class="org.spoofer.fluff.game.SimpleBot">
+        <actions>
+            <action name="stop">
+                <frame>monster_red</frame>
+            </action>
+            <action name="left">
+                <frame>monster_red_left1</frame>
+                <frame>monster_red_left2</frame>
+                <frame>monster_red_left3</frame>
+            </action>
+            <action name="right">
+                <frame>monster_red_right1</frame>
+                <frame>monster_red__right2</frame>
+                <frame>monster_red__right3</frame>
+            </action>
+            <action name="up">
+                <frame>monster_red_up1</frame>
+                <frame>monster_red_up2</frame>
+                <frame>monster_red_up3</frame>
+            </action>
+            <action name="down">
+                <frame>monster_red_down1</frame>
+                <frame>monster_red_down2</frame>
+                <frame>monster_red_down3</frame>
+            </action>
+        </actions>
+    </bot>
+</bots>
