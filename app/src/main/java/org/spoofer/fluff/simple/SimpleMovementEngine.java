@@ -28,6 +28,9 @@ public class SimpleMovementEngine implements MovementEngine {
 
 
     public void moveBot(@IdRes int botId, Movement.Direction direction) {
+        if (direction == Movement.Direction.Stop)
+            stopBot(botId);
+
         if (null == scene)
             return;
 

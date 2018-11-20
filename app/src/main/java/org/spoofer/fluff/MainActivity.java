@@ -5,12 +5,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import org.spoofer.fluff.simple.ButtonController;
 import org.spoofer.fluff.simple.SimpleMovementEngine;
 import org.spoofer.fluff.simple.SimpleScene;
 
@@ -19,6 +18,8 @@ public class MainActivity extends AppCompatActivity {
     public static final long DEBUG_UPDATE_TIME = 250;
 
     private final MovementEngine movementEngine = new SimpleMovementEngine();
+
+    private Controller controller;
 
     private Scene scene;
 
@@ -30,11 +31,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         scene = new SimpleScene();
-
-        addButton(findViewById(R.id.btn_left), Movement.Direction.Left);
-        addButton(findViewById(R.id.btn_right), Movement.Direction.Right);
-        addButton(findViewById(R.id.btn_up), Movement.Direction.Up);
-        addButton(findViewById(R.id.btn_down), Movement.Direction.Down);
+        controller = createPlayerController();
     }
 
 
@@ -50,31 +47,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         movementEngine.stopAll();
-        
+
         uiHandler.removeCallbacks(debugUpdater);
     }
 
 
-    private void addButton(View button, final Movement.Direction direction) {
-        button.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN: {
-                        movementEngine.moveBot(R.id.bot_player, direction);
-                        break;
-                    }
-                    case MotionEvent.ACTION_UP: {
-                        movementEngine.stopBot(R.id.bot_player);
-                    }
-                    default:
-                        return false;
-                }
-                return true;
-            }
-        });
 
-    }
 
 
 
@@ -106,6 +84,15 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+
+    private Controller createPlayerController() {
+        ButtonController controller = new ButtonController(R.id.bot_player, movementEngine);
+        controller.addButton(findViewById(R.id.btn_left), Movement.Direction.Left);
+        controller.addButton(findViewById(R.id.btn_right), Movement.Direction.Right);
+        controller.addButton(findViewById(R.id.btn_up), Movement.Direction.Up);
+        controller.addButton(findViewById(R.id.btn_down), Movement.Direction.Down);
+        return controller;
+    }
 
 
 }
