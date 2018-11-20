@@ -1,101 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
-
-    <LinearLayout
-        android:id="@+id/panel_game_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="10dp"
-        android:paddingHorizontal="5dp"
-        android:layout_alignParentTop="true">
-
-        <TextView
-            android:id="@+id/txt_lifecount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/lives_pattern"
-            android:textAlignment="center" />
-
-        <TextView
-            android:id="@+id/txt_score"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:text="@string/score_pattern"
-            android:textAlignment="center" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="5dp"
-            android:text="@string/time"
-            android:textAlignment="center" />
-
-        <ProgressBar
-            android:id="@+id/prg_energy"
-            style="@android:style/Widget.ProgressBar.Horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:max="100" />
-
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/panel_controls"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
-        android:background="@android:color/holo_orange_dark"
-        >
-
-        <include layout="@layout/control_panel" />
-    </LinearLayout>
-
-
-    <TextView
-        android:id="@+id/txt_gameover"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/game_over"
-        android:textStyle="bold"
-        android:textColor="@color/colorAccent"
-        android:textSize="36pt"
-        android:textAlignment="center"
-        android:visibility="gone"
-        android:layout_centerInParent="true"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Jojo!"
-        android:layout_centerInParent="true"/>
-
-    <Button
-        android:id="@+id/btn_start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/start"
-        android:layout_centerInParent="true"/>
-
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/gameboard"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colourGameboard"
+        android:layout_above="@id/panel_buttons"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Hello World!" />
+
+        <ImageView
+            android:id="@+id/bot_player"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/btn_radio" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="50dp"
+            android:src="@android:drawable/btn_dialog" />
+
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:id="@+id/panel_buttons"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/holo_green_light"
-        android:layout_below="@id/panel_game_status"
-        android:orientation="vertical">
+        android:layout_alignParentBottom="true"
+
+        android:gravity="center_horizontal |center_vertical"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="left" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <Button
+                android:id="@+id/btn_up"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Up"/>
+
+            <Button
+                android:id="@+id/btn_down"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Down"/>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="right" />
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/panel_debug"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/panel_buttons">
+
+        <TextView
+            android:id="@+id/txt_debug"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="DEBUG"
+            android:textAlignment="center" />
+
+        <RadioButton
+            android:id="@+id/led_onAir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colourGreen"/>
+    </LinearLayout>
 
 </RelativeLayout>

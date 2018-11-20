@@ -1,18 +1,21 @@
-package org.spoofer.fluff.game;
+package org.spoofer.fluff.simple;
 
 import android.graphics.Rect;
 import android.view.View;
+import android.widget.ImageView;
+
+import org.spoofer.fluff.Bot;
 
 public class SimpleBot implements Bot {
 
-    private final View view;
+    private final ImageView view;
 
-    public SimpleBot(View view) {
+    public SimpleBot(ImageView view) {
         this.view = view;
     }
 
     @Override
-    public View getView() {
+    public ImageView getView() {
         return view;
     }
 

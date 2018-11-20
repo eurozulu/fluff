@@ -1,129 +1,96 @@
 package org.spoofer.fluff;
 
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ProgressBar;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
-import org.spoofer.fluff.game.Game;
-import org.spoofer.fluff.game.GameState;
-import org.spoofer.fluff.game.SimpleGame;
-import org.spoofer.fluff.game.actions.DigAction;
-import org.spoofer.fluff.game.actions.FillAction;
-import org.spoofer.fluff.game.agents.Agent;
-import org.spoofer.fluff.game.agents.ButtonAgent;
-import org.spoofer.fluff.game.misc.Movement;
-import org.spoofer.fluff.utils.ScheduledUpdater;
+import org.spoofer.fluff.simple.SimpleMovementEngine;
+import org.spoofer.fluff.simple.SimpleScene;
 
-public class MainActivity extends AppCompatActivity implements Game.GameListener {
+public class MainActivity extends AppCompatActivity {
 
-    private static final long DISPLAY_UPDATE_INTERVAL = 500;
+    public static final long DEBUG_UPDATE_TIME = 250;
 
-    // Scheduled update of the game status controls.
-    private final ScheduledUpdater scheduledUpdater = new ScheduledUpdater(new ScheduledUpdater.Updated() {
-        @Override
-        public void update() {
-            updateGameStateDisplay();
-        }
-    }, DISPLAY_UPDATE_INTERVAL);
+    private final MovementEngine movementEngine = new SimpleMovementEngine();
 
-    private final Game game = new SimpleGame();
-    private final ButtonAgent controller = new ButtonAgent(game.getDirector(), R.id.bot_player);
+    private Scene scene;
 
+    private Handler uiHandler = new Handler(Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ((ProgressBar) findViewById(R.id.prg_energy)).setMax(100); // Works as percentage
+        scene = new SimpleScene();
 
-        game.setRootView((ViewGroup) findViewById(R.id.gameboard));
-        game.addGameListener(this);
+        addButton(findViewById(R.id.btn_left) , Movement.Direction.Left);
+        addButton(findViewById(R.id.btn_right) , Movement.Direction.Right);
+        addButton(findViewById(R.id.btn_up) , Movement.Direction.Up);
+        addButton(findViewById(R.id.btn_down) , Movement.Direction.Down);
+    }
 
-        wireUpController(controller);
+
+    private final Runnable debugUpdater = new Runnable() {
+        @Override
+        public void run() {
+            Bot bot = scene.getBot(R.id.bot_player);
+            Rect botLoc = bot.getLocation();
+            Rect sceneLoc = scene.getSceneSize();
+
+            StringBuilder s = new StringBuilder();
+            s.append(String.format("Bot loction: %s ", botLoc)).append('\n')
+                    .append(String.format("Scene loction: %s", sceneLoc));
+
+            TextView debugTxt = findViewById(R.id.txt_debug);
+            debugTxt.setText(s.toString());
+
+            RadioButton led = findViewById(R.id.led_onAir);
+            led.setBackgroundColor(movementEngine.isPerforming() ? getColor(R.color.colourRed) : getColor(R.color.colourGreen));
+            uiHandler.postDelayed(debugUpdater, DEBUG_UPDATE_TIME);
+        }
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        ((SimpleScene) scene).loadScene((ViewGroup) findViewById(R.id.gameboard));
+        movementEngine.setScene(scene);
+        uiHandler.postDelayed(debugUpdater, DEBUG_UPDATE_TIME);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        uiHandler.removeCallbacks(debugUpdater);
+    }
 
 
-        Button startButton = findViewById(R.id.btn_start);
-        startButton.setOnClickListener(new View.OnClickListener() {
+    private void addButton(View button, final Movement.Direction direction) {
+            button.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                if (!game.isPlaying())
-                    game.startNewGame();
-                else
-                    v.setVisibility(View.GONE);
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        movementEngine.moveBot(R.id.bot_player, direction);
+                        break;
+                    }
+                    case MotionEvent.ACTION_UP: {
+                        movementEngine.stopBot(R.id.bot_player);
+                    }
+                    default:
+                        return false;
+                }
+                return true;
             }
         });
-    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        scheduledUpdater.stop();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        scheduledUpdater.start();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        scheduledUpdater.stop();
-        game.endGame();
-    }
-
-    @Override
-    public void gameStarting(GameState gameState) {
-        findViewById(R.id.btn_start).setVisibility(View.GONE);
-        findViewById(R.id.txt_gameover).setVisibility(View.GONE);
-
-        findViewById(R.id.panel_controls).setEnabled(true);
-        findViewById(R.id.panel_controls).bringToFront();
-
-        scheduledUpdater.start();
-    }
-
-    @Override
-    public void gameEnding(GameState gameState) {
-
-        scheduledUpdater.stop();
-
-        findViewById(R.id.btn_start).setVisibility(View.VISIBLE);
-        findViewById(R.id.txt_gameover).setVisibility(View.VISIBLE);
-        findViewById(R.id.panel_controls).setEnabled(false);
-    }
-
-    private void updateGameStateDisplay() {
-
-        GameState gameState = game.getGameState();
-        if (null == gameState)
-            return;
-
-        String lives = String.format(getString(R.string.lives_pattern), gameState.getLives());
-        ((TextView) findViewById(R.id.txt_lifecount)).setText(lives);
-
-        String score = String.format(getString(R.string.score_pattern), gameState.getScore());
-        ((TextView) findViewById(R.id.txt_score)).setText(score);
-
-        ((ProgressBar) findViewById(R.id.prg_energy)).setProgress(gameState.getLifeEnergy());
-
-    }
-
-    private Agent wireUpController(ButtonAgent controller) {
-        controller.addButton(findViewById(R.id.btn_left), String.format("move-%s", Movement.Direction.Left.name()));
-        controller.addButton(findViewById(R.id.btn_right), String.format("move-%s", Movement.Direction.Right.name()));
-        controller.addButton(findViewById(R.id.btn_up), String.format("move-%s", Movement.Direction.Up.name()));
-        controller.addButton(findViewById(R.id.btn_down), String.format("move-%s", Movement.Direction.Down.name()));
-
-        controller.addButton(findViewById(R.id.btn_dig), DigAction.ACTION_DIG);
-        controller.addButton(findViewById(R.id.btn_fill), FillAction.ACTION_FILL);
-
-        return controller;
     }
 }

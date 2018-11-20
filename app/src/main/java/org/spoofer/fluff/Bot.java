@@ -1,7 +1,8 @@
-package org.spoofer.fluff.game;
+package org.spoofer.fluff;
 
 import android.graphics.Rect;
 import android.view.View;
+import android.widget.ImageView;
 
 /**
  * A Bot is the base object of all Game parts in each level.
@@ -15,7 +16,7 @@ public interface Bot {
      *
      * @return
      */
-    View getView();
+    ImageView getView();
 
     /**
      * Gets the current on screen location  of the Bot.
