@@ -1,17 +1,24 @@
 package org.spoofer.fluff;
 
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
 import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
 import org.spoofer.fluff.simple.ButtonController;
+import org.spoofer.fluff.simple.MonsterController;
 import org.spoofer.fluff.simple.SimpleMovementEngine;
 import org.spoofer.fluff.simple.SimpleScene;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final MovementEngine movementEngine = new SimpleMovementEngine();
 
-    private Controller controller;
+    private List<Controller> controllers = new ArrayList<>();
 
     private Scene scene;
 
@@ -31,7 +38,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         scene = new SimpleScene();
-        controller = createPlayerController();
+        controllers.add(createPlayerController());
+        controllers.addAll(getMonsterControllers(scene.getBots()));
     }
 
 
@@ -52,10 +60,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-
-
     private final Runnable debugUpdater = new Runnable() {
         @Override
         public void run() {
@@ -74,8 +78,13 @@ public class MainActivity extends AppCompatActivity {
                 TextView debugTxt = findViewById(R.id.txt_debug);
                 debugTxt.setText(s.toString());
 
-                RadioButton led = findViewById(R.id.led_onAir);
-                led.setBackgroundColor(movementEngine.isPerforming() ? getColor(R.color.colourRed) : getColor(R.color.colourGreen));
+                RadioButton ledOnAir = findViewById(R.id.led_onAir);
+                ledOnAir.setBackgroundColor(movementEngine.isPerforming() ? getColor(R.color.colourRed) : getColor(R.color.colourGreen));
+
+                RadioButton ledInCollision = findViewById(R.id.led_inCollision);
+                ledInCollision.setBackgroundColor(movementEngine.isInCollision(R.id.bot_player) ?
+                        getColor(R.color.colourRed) : getColor(R.color.colourGreen));
+
             } catch (Throwable e) {
                 e.printStackTrace();
             } finally {
@@ -94,5 +103,18 @@ public class MainActivity extends AppCompatActivity {
         return controller;
     }
 
+    private List<Controller> getMonsterControllers(Collection<Bot> bots) {
+        Resources resources = getResources();
+        List<Controller> controllers = new ArrayList<>();
+
+        for (Bot bot : bots) {
+            @IdRes int botId = bot.getView().getId();
+            String name = resources.getResourceName(botId);
+            if (null != name && name.contains("monster_red"))
+                controllers.add(new MonsterController(botId, movementEngine));
+        }
+
+        return controllers;
+    }
 
 }

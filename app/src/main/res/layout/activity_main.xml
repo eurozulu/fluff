@@ -49,6 +49,15 @@
             android:text="DEBUG"
             android:textAlignment="center" />
 
+
+
+        <RadioButton
+            android:id="@+id/led_inCollision"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/led_onAir"
+            android:background="@color/colourGreen" />
+
         <RadioButton
             android:id="@+id/led_onAir"
             android:layout_width="wrap_content"

@@ -25,8 +25,6 @@ public class SimpleMovementEngine implements MovementEngine {
     private Scene scene;
 
 
-
-
     public void moveBot(@IdRes int botId, Movement.Direction direction) {
         if (direction == Movement.Direction.Stop)
             stopBot(botId);
@@ -68,7 +66,11 @@ public class SimpleMovementEngine implements MovementEngine {
     public boolean isPerforming() {
         return !performances.isEmpty();
     }
-
+@Override
+    public boolean isInCollision(@IdRes int id) {
+        Bot bot = scene.getBot(id);
+        return collisions.containsKey(bot);
+    }
 
     private void moveBotInside(Bot actor, Movement.Direction direction, Rect boundary) {
 
@@ -105,13 +107,7 @@ public class SimpleMovementEngine implements MovementEngine {
     }
 
 
-
-    private Bot checkCollision(Bot movingBot) {
-        return null;
-    }
-
-
-    private Animator buildAnimator(final Bot bot, Movement movement) {
+    private Animator buildAnimator(final Bot bot, final Movement movement) {
         ImageView view = bot.getView();
 
         if (movement.isStill())
@@ -131,7 +127,7 @@ public class SimpleMovementEngine implements MovementEngine {
 
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                Bot collision = checkCollision(bot);
+                Bot collision = checkCollision(bot, movement.getDirection());
                 if (null != collision) {
                     collisions.put(bot, collision);
                 } else
@@ -152,9 +148,21 @@ public class SimpleMovementEngine implements MovementEngine {
         return animator;
     }
 
-    private Movement findClosestBot(Bot actor, Movement.Direction direction) {
+    private Bot checkCollision(Bot actor, Movement.Direction direction) {
+        Bot nextCollided = getNextCollision(actor, direction);
+        return null != nextCollided && nextCollided.getLocation().intersect(actor.getLocation()) ? nextCollided : null;
+    }
+
+    /**
+     * Gets the next bot the given actor will collide with
+     * @param actor
+     * @param direction
+     * @return
+     */
+    private Bot getNextCollision(Bot actor, Movement.Direction direction) {
 
         // Find closest bot, in the direction of travel;
+        Bot closestBot = null;
         Movement closest = null;
         Movement movement = new SimpleMovement(actor.getLocation());
 
@@ -169,11 +177,14 @@ public class SimpleMovementEngine implements MovementEngine {
                 movement.setEndLocation(botLoc);
                 if (movement.getDirection() == direction && (null == closest || closest.getDistance() > movement.getDistance())) {
                     closest = new SimpleMovement(movement);
+                    closestBot = bot;
                 }
             }
         }
-        return closest;
+        return closestBot;
     }
+
+
     private Rect calculatePath(Rect start, Movement.Direction direction) {
         Rect sceneLoc = scene.getSceneSize();
         Rect path = new Rect(start);

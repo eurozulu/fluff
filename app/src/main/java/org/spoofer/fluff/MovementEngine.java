@@ -14,6 +14,6 @@ public interface MovementEngine {
     void setScene(Scene scene);
 
     boolean isPerforming();
-
+    boolean isInCollision(@IdRes int id);
 
 }
