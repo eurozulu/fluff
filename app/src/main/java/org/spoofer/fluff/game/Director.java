@@ -1,11 +1,19 @@
 package org.spoofer.fluff.game;
 
-import org.spoofer.fluff.game.actions.Action;
+import android.support.annotation.IdRes;
 
+/**
+ * Director coordinates the scene, managing the Actions of each Actor and their interaction with the Scenery in the Scene
+ */
 public interface Director {
 
-    void startAction(Bot bot, Action action);
-    void stopAction(Bot bot);
+    void startScene(Scene scene);
+
+    void endScene();
+
+    void startAction(@IdRes int botId, String action);
+
+    void stopAction(@IdRes int botId);
 
     void stopAll();
 }

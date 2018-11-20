@@ -36,7 +36,7 @@ public class SimpleGameState implements GameState {
         nextLevel();
 
         startTime = System.currentTimeMillis();
-        Log.d(LOGTAG, String.format("Game state reset and game clock started @: %t", startTime));
+        Log.d(LOGTAG, String.format("Game state reset and game clock started @: %tT", startTime));
 
     }
 
@@ -59,7 +59,7 @@ public class SimpleGameState implements GameState {
     @Override
     public void nextLevel() {
         levelLayout = layouts.hasNext() ? layouts.next() : 0;
-        levelCount = levelLayout != 0 ? levelCount++  : 0;
+        levelCount = levelLayout != 0 ? levelCount + 1  : 0;
     }
 
     @Override

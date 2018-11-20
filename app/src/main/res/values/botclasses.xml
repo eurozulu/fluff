@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bot_player">org.spoofer.fluff.game.SimpleBot</string>
+    <string name="bot_monster_red">org.spoofer.fluff.game.SimpleBot</string>
+    <string name="bot_floor">org.spoofer.fluff.game.SimpleScenery</string>
+    <string name="bot_ladder">org.spoofer.fluff.game.SimpleScenery</string>
+
+</resources>

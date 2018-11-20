@@ -8,12 +8,14 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.spoofer.fluff.game.controllers.ButtonController;
-import org.spoofer.fluff.game.controllers.Controller;
 import org.spoofer.fluff.game.Game;
 import org.spoofer.fluff.game.GameState;
+import org.spoofer.fluff.game.SimpleGame;
+import org.spoofer.fluff.game.actions.DigAction;
+import org.spoofer.fluff.game.actions.FillAction;
+import org.spoofer.fluff.game.agents.Agent;
+import org.spoofer.fluff.game.agents.ButtonAgent;
 import org.spoofer.fluff.game.misc.Movement;
-import org.spoofer.fluff.game.controllers.MultiBotControler;
 import org.spoofer.fluff.utils.ScheduledUpdater;
 
 public class MainActivity extends AppCompatActivity implements Game.GameListener {
@@ -28,7 +30,8 @@ public class MainActivity extends AppCompatActivity implements Game.GameListener
         }
     }, DISPLAY_UPDATE_INTERVAL);
 
-    private final Game game = null;
+    private final Game game = new SimpleGame();
+    private final ButtonAgent controller = new ButtonAgent(game.getDirector(), R.id.bot_player);
 
 
     @Override
@@ -41,11 +44,8 @@ public class MainActivity extends AppCompatActivity implements Game.GameListener
         game.setRootView((ViewGroup) findViewById(R.id.gameboard));
         game.addGameListener(this);
 
-        game.addSceneListener(createControlPanel());
+        wireUpController(controller);
 
-        game.addSceneListener(new MultiBotControler("monster_red"));
-        game.addSceneListener(new MultiBotControler("monster_yellow"));
-        game.addSceneListener(new MultiBotControler("monster_white"));
 
         Button startButton = findViewById(R.id.btn_start);
         startButton.setOnClickListener(new View.OnClickListener() {
@@ -115,12 +115,14 @@ public class MainActivity extends AppCompatActivity implements Game.GameListener
 
     }
 
-    private Controller createControlPanel() {
-        ButtonController controller = new ButtonController(game.getDirector(), R.id.bot_player);
-        controller.addButton(findViewById(R.id.btn_left), Movement.Direction.Left);
-        controller.addButton(findViewById(R.id.btn_right), Movement.Direction.Right);
-        controller.addButton(findViewById(R.id.btn_up), Movement.Direction.Up);
-        controller.addButton(findViewById(R.id.btn_down), Movement.Direction.Down);
+    private Agent wireUpController(ButtonAgent controller) {
+        controller.addButton(findViewById(R.id.btn_left), String.format("move-%s", Movement.Direction.Left.name()));
+        controller.addButton(findViewById(R.id.btn_right), String.format("move-%s", Movement.Direction.Right.name()));
+        controller.addButton(findViewById(R.id.btn_up), String.format("move-%s", Movement.Direction.Up.name()));
+        controller.addButton(findViewById(R.id.btn_down), String.format("move-%s", Movement.Direction.Down.name()));
+
+        controller.addButton(findViewById(R.id.btn_dig), DigAction.ACTION_DIG);
+        controller.addButton(findViewById(R.id.btn_fill), FillAction.ACTION_FILL);
 
         return controller;
     }

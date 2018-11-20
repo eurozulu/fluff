@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<botscript>
+    <actions>
+        <action
+            name="Stop"
+            class=".MoveAction"
+            direction="Stop" />
+        <action
+            name="Left"
+            class=".MoveAction"
+            direction="Left" />
+        <action
+            name="Right"
+            class=".MoveAction"
+            direction="Right" />
+        <action
+            name="Up"
+            class=".MoveAction"
+            direction="Up" />
+        <action
+            name="Down"
+            class=".MoveAction"
+            direction="Down" />
+    </actions>
+
+    <bot id="@id/bot_player">
+        <action name="Stop">
+            <frame id="@drawable/player" />
+        </action>
+        <action name="Left">
+            <frame id="@drawable/player_left1" />
+            <frame id="@drawable/player_left2" />
+            <frame id="@drawable/player_left3" />
+        </action>
+        <action name="Right">
+            <movement direction="Right" />
+            <frame id="@drawable/player_right1" />
+            <frame id="@drawable/player_right2" />
+            <frame id="@drawable/player_right3" />
+        </action>
+        <action name="Up">
+            <frame id="@drawable/player_up1" />
+            <frame id="@drawable/player_up2" />
+            <frame id="@drawable/player_up3" />
+        </action>
+        <action name="Down">
+            <frame id="@drawable/player_down1" />
+            <frame id="@drawable/player_down2" />
+            <frame id="@drawable/player_down3" />
+        </action>
+    </bot>
+    <bot id="@id/monster_red">
+        <action name="Stop">
+            <frame id="@drawable/monster_red" />
+        </action>
+        <action name="Left">
+            <frame id="@drawable/monster_red_left1" />
+            <frame id="@drawable/monster_red_left2" />
+            <frame id="@drawable/monster_red_left3" />
+        </action>
+        <action name="Right">
+            <frame id="@drawable/monster_red_right1" />
+            <frame id="@drawable/monster_red_right2" />
+            <frame id="@drawable/monster_red_right3" />
+        </action>
+        <action name="Up">
+            <frame id="@drawable/monster_red_up1" />
+            <frame id="@drawable/monster_red_up2" />
+            <frame id="@drawable/monster_red_up3" />
+        </action>
+        <action name="Down">
+            <frame id="@drawable/monster_red_down1" />
+            <frame id="@drawable/monster_red_down2" />
+            <frame id="@drawable/monster_red_down3" />
+        </action>
+    </bot>
+</botscript>

@@ -1,4 +1,4 @@
-package org.spoofer.fluff.game.controllers;
+package org.spoofer.fluff.game.agents;
 
 import android.view.MotionEvent;
 import android.view.View;
@@ -6,26 +6,29 @@ import android.view.View;
 import org.spoofer.fluff.game.Director;
 import org.spoofer.fluff.game.misc.Movement;
 
-public class ButtonController extends SingleBotController {
+/**
+ * Button Agent adds a TouchListener to a given View to issue a new command to the director each time the
+ * View is touched and issues a Stop when the touch is released.
+ * Usually the View is a Button or similar
+ */
+public class ButtonAgent extends SimpleAgent {
 
-    public ButtonController(Director director, int actorId) {
+    public ButtonAgent(Director director, int actorId) {
         super(director, actorId);
     }
 
-    public void addButton(View view, final Movement.Direction direction) {
+    public void addButton(View view, final String command) {
         view.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                boolean used = false;
+                boolean used = true;
 
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        setDirection(direction);
-                        used = true;
+                        performCommand(command);
                         break;
                     case MotionEvent.ACTION_UP:
-                        used = true;
-                        setDirection(Movement.Direction.Stop);
+                        performCommand(Movement.Direction.Stop.name());
                         break;
                     default:
                         used = false;

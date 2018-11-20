@@ -5,35 +5,40 @@ import android.content.res.XmlResourceParser;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.IdRes;
 import android.support.annotation.XmlRes;
+import android.util.Log;
 
-import org.spoofer.fluff.BuildConfig;
 import org.spoofer.fluff.game.Bot;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BotConfigReader {
 
+    private static final String LOGTAG = BotConfigReader.class.getName();
+
 
     private static final String TAG_BOT = "bot";
     private static final String TAG_ACTIONS = "actions";
-    private static final String TAG_ACTION = "actions";
+    private static final String TAG_ACTION = "action";
+    private static final String TAG_FRAME = "frame";
 
     private static final String ATTR_ID = "id";
     private static final String ATTR_CLASSNAME = "class";
+    private static final String ATTR_ACTION_NAME = "name";
 
-    private static final String PACKAGE_NAME = BuildConfig.APPLICATION_ID;
 
-
-    private final Map<String, BotConfig> botConfigs = new HashMap<>();
-
+    private final Map<Integer, BotConfig> botConfigs = new HashMap<>();
 
 
     class BotConfig {
+        @IdRes
         private final int viewId;
+
         private final Map<String, int[]> actions = new HashMap<>();
         private final Class<? extends Bot> botClass;
 
@@ -42,6 +47,7 @@ public class BotConfigReader {
             this.botClass = botClass;
         }
 
+        @IdRes
         public int getViewId() {
             return viewId;
         }
@@ -55,21 +61,19 @@ public class BotConfigReader {
         }
     }
 
-    public boolean contains(String name) {
-        return botConfigs.containsKey(name);
-    }
     public boolean contains(@IdRes int id) {
-        return getById(id) != null;
+        return botConfigs.containsKey(id);
     }
 
+
     public Class<? extends Bot> getBotClass(@IdRes int id) {
-        BotConfig config = getById(id);
+        BotConfig config = botConfigs.get(id);
         return null != config ? config.botClass : null;
     }
 
     @DrawableRes
-    public int[] getBotFrames(String name, String action) {
-        return botConfigs.containsKey(name) ? botConfigs.get(name).getActions().get(action) : null;
+    public int[] getBotFrames(@IdRes int id, String action) {
+        return botConfigs.containsKey(id) ? botConfigs.get(id).getActions().get(action) : null;
     }
 
 
@@ -82,14 +86,12 @@ public class BotConfigReader {
             int event = parser.getEventType();
 
             while (event != XmlPullParser.END_DOCUMENT) {
-                if (event == XmlPullParser.START_TAG) {
-                    String name = parser.getName();
-
-                    if (TAG_BOT.equals(name))
-                        readBotTag(parser);
-
+                if (event == XmlPullParser.START_TAG && TAG_BOT.equals(parser.getName())) {
+                    BotConfig config = readBotTag(parser);
+                    if (null != config)
+                        botConfigs.put(config.viewId, config);
                 }
-                parser.nextTag();
+                event = parser.next();
             }
 
         } catch (XmlPullParserException e) {
@@ -98,37 +100,77 @@ public class BotConfigReader {
         return this;
     }
 
-    private BotConfig readBotTag(XmlResourceParser parser, Resources resources) {
+    private BotConfig readBotTag(XmlResourceParser parser) throws XmlPullParserException, IOException {
+
+        BotConfig botConfig;
 
         @IdRes
-        int botId = 0;
-        String idName = parser.getAttributeValue(null, ATTR_ID);
-
-        if (null != idName && idName.length() > 0)
-            botId = resources.getIdentifier(idName, "id", PACKAGE_NAME);
-
+        int botId = parser.getIdAttributeResourceValue(0);
         Class<? extends Bot> botClass = readBotClass(parser);
 
-        if (0 != botId && null != botClass)
-            botClasses.put(id, botClass);
+        if (0 != botId && null != botClass) {
+            botConfig = new BotConfig(botId, botClass);
+            readBotActions(parser, botConfig.getActions());
 
-    }
-
-
-    private BotConfig getById(@IdRes int id) {
-        BotConfig found = null;
-        for (BotConfig config : botConfigs.values()) {
-            if (config.viewId == id) {
-                found = config;
-                break;
-            }
+        } else {
+            Log.d(LOGTAG, String.format("Ignoring bot config as either ID (%s) is invalid or no class (%s) could be loaded",
+                    botId, botClass));
+            botConfig = null;
         }
-        return found;
+
+        return botConfig;
     }
 
 
+    private void readBotActions(XmlResourceParser parser, Map<String, int[]> frames) throws XmlPullParserException, IOException {
+        int event = parser.getEventType();
 
-    private Class<? extends Bot> readBotClass(XmlResourceParser parser) throws IOException, XmlPullParserException {
+        while (event != XmlPullParser.END_DOCUMENT) {
+            if (event == XmlPullParser.START_TAG) {
+                String name = parser.getName();
+
+                if (TAG_ACTION.equals(name)) {
+                    BotAction action = readBotAction(parser);
+                    if (null != action)
+                        frames.put(action.name, action.frames);
+                }
+            } else if (event == XmlPullParser.END_TAG && TAG_ACTIONS.equals(parser.getName()))
+                break;
+
+            event = parser.next();
+        }
+
+    }
+
+    private BotAction readBotAction(XmlResourceParser parser) throws XmlPullParserException, IOException {
+        BotAction action = new BotAction();
+        action.name = parser.getAttributeValue(null, ATTR_ACTION_NAME);
+
+
+        List<Integer> frames = new ArrayList<>();
+        int event = parser.next();
+        while (event != XmlPullParser.END_DOCUMENT) {
+            if (event == XmlPullParser.START_TAG && TAG_FRAME.equals(parser.getName())) {
+                int id = parser.getIdAttributeResourceValue(0);
+                if (id != 0)
+                    frames.add(id);
+            }
+
+            event = parser.next();
+
+            if (event == XmlPullParser.END_TAG && TAG_ACTION.equals(parser.getName()))
+                break;
+
+        }
+
+        Integer[] frameArray = new Integer[frames.size()];
+        frames.toArray(frameArray);
+        action.frames = frameArray;
+
+        return action;
+    }
+
+    private Class<? extends Bot> readBotClass(XmlResourceParser parser) {
         Class<? extends Bot> botClass = null;
 
         String class_name = parser.getAttributeValue(null, ATTR_CLASSNAME);
@@ -144,4 +186,8 @@ public class BotConfigReader {
     }
 
 
+    private class BotAction {
+        String name;
+        int[] frames;
+    }
 }

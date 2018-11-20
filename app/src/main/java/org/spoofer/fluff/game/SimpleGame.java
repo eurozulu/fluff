@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import org.spoofer.fluff.game.agents.AgentGroup;
 import org.spoofer.fluff.game.misc.LevelSequence;
 import org.spoofer.fluff.utils.ScheduledUpdater;
 
@@ -22,7 +23,6 @@ public class SimpleGame implements Game {
 
     private final GameState gameState = new SimpleGameState();
     private final Set<GameListener> gameListeners = new HashSet<>();
-    private final Set<SceneListener> sceneListeners = new HashSet<>();
 
 
     private final ScheduledUpdater gameScheduler = new ScheduledUpdater(new ScheduledUpdater.Updated() {
@@ -46,22 +46,10 @@ public class SimpleGame implements Game {
 
     private ViewGroup rootView;
 
-    private Scene currentScene;
-
 
     @Override
     public Director getDirector() {
         return director;
-    }
-
-    @Override
-    public void addSceneListener(SceneListener listener) {
-        sceneListeners.add(listener);
-    }
-
-    @Override
-    public void removeSceneListener(SceneListener listener) {
-        sceneListeners.remove(listener);
     }
 
     @Override
@@ -112,34 +100,24 @@ public class SimpleGame implements Game {
 
     @Override
     public void endGame() {
-        endScene();
+        director.endScene();
 
         for (GameListener listener : gameListeners)
             listener.gameEnding(gameState);
     }
 
-    private void endScene() {
-
-        if (null != currentScene) {
-            for (SceneListener listener : sceneListeners)
-                listener.sceneEnding(currentScene);
-
-            currentScene = null;
-        }
-    }
 
     private void startScene(@LayoutRes int layoutId) {
 
-        endScene();  // Kill any existing scene first.
+        director.endScene();  // Kill any existing scene first.
 
         if (layoutId == 0)
             return;
 
-        currentScene = loadScene(layoutId);
+        Scene scene = loadScene(layoutId);
 
-        if (currentScene != null) {
-            for (SceneListener listener : sceneListeners)
-                listener.sceneStarting(currentScene);
+        if (scene != null) {
+            director.startScene(scene);
         } else {
             Log.d(LOGTAG, String.format("Failed to load scene id %s", layoutId));
         }
@@ -159,5 +137,23 @@ public class SimpleGame implements Game {
         rootView.addView(levelLayout);
 
         return new SimpleScene(levelLayout);
+    }
+
+    private void loadAgents() {
+        //TODO: fill in the monster IDs
+
+        int[] monstersRed = new int[] {
+
+        };
+        int[] monstersYellow = new int[] {
+
+        };
+        int[] monstersWhite = new int[] {
+
+        };
+        new AgentGroup(director, monstersRed);
+        new AgentGroup(director, monstersYellow);
+        new AgentGroup(director, monstersWhite);
+
     }
 }

@@ -1,10 +1,8 @@
 package org.spoofer.fluff.game;
 
-import android.graphics.Rect;
-
-import org.spoofer.fluff.game.misc.Movement;
+import org.spoofer.fluff.game.actions.Action;
 
 public interface Scenery extends Bot {
 
-    Movement getMovement(Rect fromLocation, Movement.Direction direction);
+    Action getAction(Bot actor, String action);
 }

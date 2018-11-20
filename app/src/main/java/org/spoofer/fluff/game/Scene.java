@@ -15,7 +15,7 @@ public interface Scene {
     /**
      * Initiates the Bots from the sceneView.
      */
-    public void setSceneView(ViewGroup sceneView);
+    //void setSceneView(ViewGroup sceneView);
 
     /**
      * Gets the parent {@link ViewGroup} containing this scene.
@@ -34,7 +34,7 @@ public interface Scene {
 
 
     /**
-     * Gets the Scenery bots in this scene.
+     * Gets the Scenery botclasses in this scene.
      * Scenery are the static Bots.
      *
      * @return

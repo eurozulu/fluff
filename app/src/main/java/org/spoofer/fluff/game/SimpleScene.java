@@ -1,5 +1,6 @@
 package org.spoofer.fluff.game;
 
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.support.annotation.IdRes;
 import android.util.Log;
@@ -7,10 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.spoofer.fluff.BuildConfig;
-import org.spoofer.fluff.R;
-import org.spoofer.fluff.utils.BotConfigReader;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
@@ -24,16 +22,18 @@ public class SimpleScene implements Scene {
 
     private static final int SCENERY_SEARCH_AREA = 10; // size of area around actor to lok for scenery.
 
-    private final ViewGroup sceneView;
-
     private final Set<Bot> bots = new HashSet<>();
     private final Set<Scenery> sceneries = new HashSet<>();
 
+    private ViewGroup sceneView;
 
-    public SimpleScene(ViewGroup gameboard) {
-        if (null == gameboard)
-            throw new NullPointerException("Scene ViewGroup parent can not be null");
-        this.sceneView = gameboard;
+
+    public SimpleScene() {
+        this(null);
+    }
+
+    public SimpleScene(ViewGroup sceneView) {
+        setSceneView(sceneView);
     }
 
     @Override
@@ -67,28 +67,28 @@ public class SimpleScene implements Scene {
         return sceneryFound;
     }
 
-    @Override
+
     public void setSceneView(ViewGroup sceneView) {
         bots.clear();
         sceneries.clear();
 
-        try {
-            BotConfigReader botConfigReader = new BotConfigReader().loadConfig(sceneView.getResources(), R.xml.bots);
-            loadBots(sceneView, botConfigReader);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if (null == sceneView)
+            return;
+
+        loadBots(sceneView);
     }
 
-    private void loadBots(ViewGroup parent, BotConfigReader botConfigReader) {
+
+    private void loadBots(ViewGroup parent) {
         for (int index = 0; index < parent.getChildCount(); index++) {
             View view = parent.getChildAt(index);
 
             if (view instanceof ViewGroup) // Recusive call with group views to iterate their child views
-                loadBots((ViewGroup) view, botConfigReader);
+                loadBots((ViewGroup) view);
 
-            else if (botConfigReader.contains(view.getId())) {
-                Bot bot = createBotFromView(view, botConfigReader.getBotClass(view.getId()));
+            else if (View.NO_ID != view.getId() && 0 != view.getId()) {
+                Bot bot = createBotFromView(view, getBotClass(view.getId(), view.getResources()));
+
                 if (null != bot) {
 
                     bots.add(bot);
@@ -100,6 +100,27 @@ public class SimpleScene implements Scene {
         }
     }
 
+
+    private Class<? extends Bot> getBotClass(@IdRes int id, Resources resources) {
+
+        Class<? extends Bot> botClass = null;
+
+        try {
+            // Match given ID name with string ID name
+            String name = resources.getResourceName(id);
+            int szId = resources.getIdentifier(name, "string", PACKAGE_NAME);
+            String className = resources.getString(szId);
+
+            botClass = Class.forName(className).asSubclass(Bot.class);
+
+        } catch (Resources.NotFoundException e) {
+            e.printStackTrace();
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return botClass;
+    }
 
     private Bot createBotFromView(View view, Class<? extends Bot> botClass) {
         Bot bot = null;
@@ -121,10 +142,8 @@ public class SimpleScene implements Scene {
                 Log.e(LOGTAG, String.format("Failed to instanciate Bot class %s", botClass.getName()), e);
             }
         }
-
         return bot;
     }
-
 
 
     private Scenery getClosestToCenter(Rect location, Scenery... sceneries) {

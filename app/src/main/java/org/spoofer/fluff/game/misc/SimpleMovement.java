@@ -36,6 +36,21 @@ public class SimpleMovement implements Movement {
     }
 
     @Override
+    public boolean isHorizontal() {
+        return toLocation.centerX() != fromLocation.centerX();
+    }
+
+    @Override
+    public boolean isVertical() {
+        return toLocation.centerY() != fromLocation.centerY();
+    }
+
+    @Override
+    public int getVelocity() {
+        return VELOCITY;
+    }
+
+    @Override
     public Rect getFromLocation() {
         return fromLocation;
     }

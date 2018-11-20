@@ -2,6 +2,8 @@ package org.spoofer.fluff.game.misc;
 
 import android.graphics.Rect;
 
+import org.spoofer.fluff.game.actions.Action;
+
 public interface Movement {
 
     int VELOCITY = 250;  // points / second
