@@ -4,13 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+
     <RelativeLayout
         android:id="@+id/gameboard"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colourGameboard"
         android:layout_above="@id/panel_buttons"
-        >
+        android:background="@color/colourGameboard">
 
         <TextView
             android:layout_width="wrap_content"
@@ -40,47 +40,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-
-        android:gravity="center_horizontal |center_vertical"
         android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/btn_left"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="left" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <Button
-                android:id="@+id/btn_up"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Up"/>
-
-            <Button
-                android:id="@+id/btn_down"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Down"/>
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/btn_right"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="right" />
-
+    <include layout="@layout/control_panel" />
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/panel_debug"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/panel_buttons">
+        android:layout_above="@id/panel_buttons"
+        >
 
         <TextView
             android:id="@+id/txt_debug"
@@ -94,7 +64,8 @@
             android:id="@+id/led_onAir"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/colourGreen"/>
-    </LinearLayout>
+            android:layout_alignParentRight="true"
+            android:background="@color/colourGreen" />
+    </RelativeLayout>
 
 </RelativeLayout>
