@@ -49,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        movementEngine.stopAll();
+        
         uiHandler.removeCallbacks(debugUpdater);
     }
 
