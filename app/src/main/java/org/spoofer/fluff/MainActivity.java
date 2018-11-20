@@ -31,32 +31,12 @@ public class MainActivity extends AppCompatActivity {
 
         scene = new SimpleScene();
 
-        addButton(findViewById(R.id.btn_left) , Movement.Direction.Left);
-        addButton(findViewById(R.id.btn_right) , Movement.Direction.Right);
-        addButton(findViewById(R.id.btn_up) , Movement.Direction.Up);
-        addButton(findViewById(R.id.btn_down) , Movement.Direction.Down);
+        addButton(findViewById(R.id.btn_left), Movement.Direction.Left);
+        addButton(findViewById(R.id.btn_right), Movement.Direction.Right);
+        addButton(findViewById(R.id.btn_up), Movement.Direction.Up);
+        addButton(findViewById(R.id.btn_down), Movement.Direction.Down);
     }
 
-
-    private final Runnable debugUpdater = new Runnable() {
-        @Override
-        public void run() {
-            Bot bot = scene.getBot(R.id.bot_player);
-            Rect botLoc = bot.getLocation();
-            Rect sceneLoc = scene.getSceneSize();
-
-            StringBuilder s = new StringBuilder();
-            s.append(String.format("Bot loction: %s ", botLoc)).append('\n')
-                    .append(String.format("Scene loction: %s", sceneLoc));
-
-            TextView debugTxt = findViewById(R.id.txt_debug);
-            debugTxt.setText(s.toString());
-
-            RadioButton led = findViewById(R.id.led_onAir);
-            led.setBackgroundColor(movementEngine.isPerforming() ? getColor(R.color.colourRed) : getColor(R.color.colourGreen));
-            uiHandler.postDelayed(debugUpdater, DEBUG_UPDATE_TIME);
-        }
-    };
 
     @Override
     protected void onStart() {
@@ -74,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void addButton(View button, final Movement.Direction direction) {
-            button.setOnTouchListener(new View.OnTouchListener() {
+        button.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
@@ -93,4 +73,37 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
+
+
+    private final Runnable debugUpdater = new Runnable() {
+        @Override
+        public void run() {
+            Bot bot = scene.getBot(R.id.bot_player);
+            try {
+                if (null == bot)
+                    return;
+
+                Rect botLoc = bot.getLocation();
+                Rect sceneLoc = scene.getSceneSize();
+
+                StringBuilder s = new StringBuilder();
+                s.append(String.format("Bot loction: %s ", botLoc)).append('\n')
+                        .append(String.format("Scene loction: %s", sceneLoc));
+
+                TextView debugTxt = findViewById(R.id.txt_debug);
+                debugTxt.setText(s.toString());
+
+                RadioButton led = findViewById(R.id.led_onAir);
+                led.setBackgroundColor(movementEngine.isPerforming() ? getColor(R.color.colourRed) : getColor(R.color.colourGreen));
+            } catch (Throwable e) {
+                e.printStackTrace();
+            } finally {
+                uiHandler.postDelayed(debugUpdater, DEBUG_UPDATE_TIME);
+            }
+        }
+    };
+
+
+
 }

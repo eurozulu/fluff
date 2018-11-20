@@ -28,7 +28,9 @@ public class SimpleScene implements Scene {
         return bots.get(id);
     }
 
-    public ViewGroup getSceneView() { return sceneView; }
+    public ViewGroup getSceneView() {
+        return sceneView;
+    }
 
     public Rect getSceneSize() {
         View view = getSceneView();
@@ -41,10 +43,19 @@ public class SimpleScene implements Scene {
     public void loadScene(ViewGroup sceneView) {
         this.sceneView = sceneView;
         bots.clear();
+        if (null != sceneView)
+            loadSceneInternal(sceneView);
+    }
 
-        for (int index = 0; index < sceneView.getChildCount(); index++) {
-            View view = sceneView.getChildAt(index);
-            if (isViewABot(view)) {
+    private void loadSceneInternal(ViewGroup parent) {
+
+        for (int index = 0; index < parent.getChildCount(); index++) {
+            View view = parent.getChildAt(index);
+
+            if (view instanceof ViewGroup)
+                loadSceneInternal((ViewGroup) view);
+
+            else if (isViewABot(view)) {
                 bots.put(view.getId(), new SimpleBot((ImageView) view));
             }
         }
