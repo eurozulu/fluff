@@ -36,12 +36,14 @@
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/bot_floor_1_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/floortile"
                 android:tag="bot.floor" />
 
             <ImageView
+                android:id="@+id/bot_floor_1_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/floortile"
@@ -56,6 +58,7 @@
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/bot_floor_2_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/floortile_medium"
@@ -70,6 +73,7 @@
             android:orientation="horizontal">
 
             <ImageView
+                android:id="@+id/bot_floor_3_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/floortile_large"

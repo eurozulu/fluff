@@ -66,11 +66,48 @@ public class SimpleMovementEngine implements MovementEngine {
     public boolean isPerforming() {
         return !performances.isEmpty();
     }
-@Override
+
+    @Override
     public boolean isInCollision(@IdRes int id) {
         Bot bot = scene.getBot(id);
         return collisions.containsKey(bot);
     }
+
+    private void moveBotOutside(Bot actor, Movement.Direction direction, Rect boundary) {
+            int distance;
+
+            Rect botLoc = actor.getLocation();
+
+
+            switch (direction) {
+                case Left:
+                    distance = botLoc.left < boundary.right ? -(boundary.right - botLoc.left) : 0;
+                    break;
+                case Right:
+                    distance = botLoc.right > boundary.left ? boundary.right - botLoc.right : 0;
+                    break;
+                case Up:
+                    distance = botLoc. > boundary.top ? botLoc.top - boundary.top : 0;
+                    break;
+                case Down:
+                    distance = botLoc.bottom < boundary.bottom ? boundary.bottom - botLoc.bottom : 0;
+                    break;
+
+                default:
+                    distance = 0;
+            }
+
+            Movement movement = new SimpleMovement(actor.getLocation(), direction, distance);
+            if (movement.isStill())
+                return;
+
+            Animator animator = buildAnimator(actor, movement);
+            performances.put(actor, animator);
+
+            animator.start();
+
+    }
+
 
     private void moveBotInside(Bot actor, Movement.Direction direction, Rect boundary) {
 
@@ -129,8 +166,10 @@ public class SimpleMovementEngine implements MovementEngine {
             public void onAnimationUpdate(ValueAnimator animation) {
                 Bot collision = checkCollision(bot, movement.getDirection());
                 if (null != collision) {
-                    collisions.put(bot, collision);
-                } else
+                    if (collisions.put(bot, collision) != collision)
+                        moveBotInside(bot, movement.getDirection(), collision.getLocation());
+
+                } else if (movement.getDirection() != Movement.Direction.Stop)
                     collisions.remove(bot);
             }
         });
@@ -155,6 +194,7 @@ public class SimpleMovementEngine implements MovementEngine {
 
     /**
      * Gets the next bot the given actor will collide with
+     *
      * @param actor
      * @param direction
      * @return
@@ -164,9 +204,11 @@ public class SimpleMovementEngine implements MovementEngine {
         // Find closest bot, in the direction of travel;
         Bot closestBot = null;
         Movement closest = null;
+        Rect widenedLoc = actor.getLocation();
+        widenedLoc.inset(-10, -10);
         Movement movement = new SimpleMovement(actor.getLocation());
 
-        Rect actorPath = calculatePath(actor.getLocation(), direction);
+        Rect actorPath = calculatePath(widenedLoc, direction);
 
         for (Bot bot : scene.getBots()) {
             if (bot == actor)
@@ -175,7 +217,7 @@ public class SimpleMovementEngine implements MovementEngine {
             Rect botLoc = bot.getLocation();
             if (botLoc.intersects(botLoc, actorPath)) {
                 movement.setEndLocation(botLoc);
-                if (movement.getDirection() == direction && (null == closest || closest.getDistance() > movement.getDistance())) {
+                if (null == closest || closest.getDistance() > movement.getDistance()) {
                     closest = new SimpleMovement(movement);
                     closestBot = bot;
                 }

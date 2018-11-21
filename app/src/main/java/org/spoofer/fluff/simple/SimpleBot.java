@@ -28,4 +28,9 @@ public class SimpleBot implements Bot {
                 outLocation[0] + view.getWidth(), outLocation[1] + view.getHeight());
     }
 
+
+    @Override
+    public String toString() {
+        return super.toString() + String.format("[%s]", getView());
+    }
 }

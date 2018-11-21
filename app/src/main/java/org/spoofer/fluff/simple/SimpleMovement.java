@@ -63,7 +63,7 @@ public class SimpleMovement implements Movement {
         int distX = toLocation.centerX() - fromLocation.centerX();
         int distY = toLocation.centerY() - fromLocation.centerY();
 
-        if (distX >= distY) {
+        if (Math.abs(distX) >= Math.abs(distY)) {
             direction = distX > 0 ? Direction.Right : distX < 0 ? Direction.Left : Direction.Stop;
             distance = Math.abs(distX);
         } else {
