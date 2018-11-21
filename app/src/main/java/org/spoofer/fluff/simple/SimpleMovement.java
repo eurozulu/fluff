@@ -41,7 +41,7 @@ public class SimpleMovement implements Movement {
     }
 
     public void setStartLocation(Rect startLocation) {
-        this.fromLocation = null != startLocation ? startLocation : new Rect();
+        this.fromLocation = null != startLocation ? new Rect(startLocation) : new Rect();
     }
 
     public Rect getEndLocation() {

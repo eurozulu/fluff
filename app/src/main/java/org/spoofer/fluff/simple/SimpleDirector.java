@@ -10,8 +10,8 @@ import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 
 import org.spoofer.fluff.Bot;
-import org.spoofer.fluff.Movement;
 import org.spoofer.fluff.Director;
+import org.spoofer.fluff.Movement;
 import org.spoofer.fluff.Scene;
 
 import java.util.HashMap;
@@ -39,12 +39,9 @@ public class SimpleDirector implements Director {
 
 
     public void stopBot(@IdRes int botId) {
-        final Bot bot = null != scene ? scene.getBot(botId) : null;
-        Animator animator = performances.get(bot);
-        if (null != animator) {
-            animator.cancel();
-            performances.remove(bot);
-        }
+        Bot bot = null != scene ? scene.getBot(botId) : null;
+        if (null != bot)
+            stopBot(bot);
     }
 
     public void stopAll() {
@@ -73,39 +70,34 @@ public class SimpleDirector implements Director {
         return collisions.containsKey(bot);
     }
 
+    // Move the bot to the opposite edge of the direction of travel.
+    // i.e. if direction =Left, move to right side, if Up, move to Bottom.
     private void moveBotOutside(Bot actor, Movement.Direction direction, Rect boundary) {
-            int distance;
 
-            Rect botLoc = actor.getLocation();
+        Rect botLoc = actor.getLocation();
+        Rect newLoc = new Rect(botLoc);
 
+        switch (direction) {
+            case Left:
+                newLoc.offset(boundary.right - botLoc.left, 0);
+                break;
+            case Right:
+                newLoc.offset(boundary.left - botLoc.right, 0);
+                break;
+            case Up:
+                newLoc.offset(0, boundary.bottom - botLoc.top);
+                break;
+            case Down:
+                newLoc.offset(0, boundary.top - botLoc.bottom);
+                break;
+        }
 
-            switch (direction) {
-                case Left:
-                    distance = botLoc.left < boundary.right ? -(boundary.right - botLoc.left) : 0;
-                    break;
-                case Right:
-                    distance = botLoc.right > boundary.left ? boundary.right - botLoc.right : 0;
-                    break;
-                case Up:
-                    distance = botLoc. > boundary.top ? botLoc.top - boundary.top : 0;
-                    break;
-                case Down:
-                    distance = botLoc.bottom < boundary.bottom ? boundary.bottom - botLoc.bottom : 0;
-                    break;
+        Movement movement = new SimpleMovement(botLoc);
+        movement.setEndLocation(newLoc);
+        if (movement.isStill())
+            return;
 
-                default:
-                    distance = 0;
-            }
-
-            Movement movement = new SimpleMovement(actor.getLocation(), direction, distance);
-            if (movement.isStill())
-                return;
-
-            Animator animator = buildAnimator(actor, movement);
-            performances.put(actor, animator);
-
-            animator.start();
-
+        moveBot(actor, movement);
     }
 
 
@@ -137,12 +129,22 @@ public class SimpleDirector implements Director {
         if (movement.isStill())
             return;
 
+        moveBot(actor, movement);
+    }
+
+    private void moveBot(Bot actor, Movement movement) {
+        stopBot(actor);
         Animator animator = buildAnimator(actor, movement);
         performances.put(actor, animator);
 
         animator.start();
     }
 
+    private void stopBot(Bot bot) {
+        Animator animator = performances.remove(bot);
+        if (null != animator)
+            animator.cancel();
+    }
 
     private Animator buildAnimator(final Bot bot, final Movement movement) {
         ImageView view = bot.getView();
@@ -167,7 +169,7 @@ public class SimpleDirector implements Director {
                 Bot collision = checkCollision(bot, movement.getDirection());
                 if (null != collision) {
                     if (collisions.put(bot, collision) != collision)
-                        moveBotInside(bot, movement.getDirection(), collision.getLocation());
+                        moveBotOutside(bot, movement.getDirection(), collision.getLocation());
 
                 } else if (movement.getDirection() != Movement.Direction.Stop)
                     collisions.remove(bot);
@@ -205,7 +207,7 @@ public class SimpleDirector implements Director {
         Bot closestBot = null;
         Movement closest = null;
         Rect widenedLoc = actor.getLocation();
-        widenedLoc.inset(-10, -10);
+        //widenedLoc.inset(-10, -10);
         Movement movement = new SimpleMovement(actor.getLocation());
 
         Rect actorPath = calculatePath(widenedLoc, direction);
