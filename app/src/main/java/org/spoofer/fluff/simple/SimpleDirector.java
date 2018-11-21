@@ -11,13 +11,13 @@ import android.widget.ImageView;
 
 import org.spoofer.fluff.Bot;
 import org.spoofer.fluff.Movement;
-import org.spoofer.fluff.MovementEngine;
+import org.spoofer.fluff.Director;
 import org.spoofer.fluff.Scene;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class SimpleMovementEngine implements MovementEngine {
+public class SimpleDirector implements Director {
 
     private final Map<Bot, Animator> performances = new HashMap<>();
     private final Map<Bot, Bot> collisions = new HashMap<>();

@@ -4,18 +4,18 @@ import android.support.annotation.IdRes;
 
 import org.spoofer.fluff.Controller;
 import org.spoofer.fluff.Movement;
-import org.spoofer.fluff.MovementEngine;
+import org.spoofer.fluff.Director;
 
 public class SimpleController implements Controller {
 
     @IdRes
     private final int id;
 
-    private final MovementEngine movementEngine;
+    private final Director director;
 
-    public SimpleController(int id, MovementEngine movementEngine) {
+    public SimpleController(int id, Director director) {
         this.id = id;
-        this.movementEngine = movementEngine;
+        this.director = director;
     }
 
     @Override
@@ -25,8 +25,8 @@ public class SimpleController implements Controller {
 
     @Override
     public void move(Movement.Direction direction) {
-        movementEngine.moveBot(getBotId(), direction);
+        director.moveBot(getBotId(), direction);
     }
 
-    protected MovementEngine getMovementEngine() { return movementEngine;}
+    protected Director getDirector() { return director;}
 }

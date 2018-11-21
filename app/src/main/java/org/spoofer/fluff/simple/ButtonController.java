@@ -4,13 +4,13 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import org.spoofer.fluff.Movement;
-import org.spoofer.fluff.MovementEngine;
+import org.spoofer.fluff.Director;
 import org.spoofer.fluff.R;
 
 public class ButtonController extends SimpleController {
 
-    public ButtonController(int id, MovementEngine movementEngine) {
-        super(id, movementEngine);
+    public ButtonController(int id, Director director) {
+        super(id, director);
     }
 
     public void addButton(View button, final Movement.Direction direction) {
@@ -19,11 +19,11 @@ public class ButtonController extends SimpleController {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN: {
-                        getMovementEngine().moveBot(R.id.bot_player, direction);
+                        getDirector().moveBot(R.id.bot_player, direction);
                         break;
                     }
                     case MotionEvent.ACTION_UP: {
-                        getMovementEngine().stopBot(R.id.bot_player);
+                        getDirector().stopBot(R.id.bot_player);
                     }
                     default:
                         return false;

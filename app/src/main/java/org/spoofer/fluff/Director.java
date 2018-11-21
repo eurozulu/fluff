@@ -2,7 +2,7 @@ package org.spoofer.fluff;
 
 import android.support.annotation.IdRes;
 
-public interface MovementEngine {
+public interface Director {
 
 
     void moveBot(@IdRes int botId, Movement.Direction direction);

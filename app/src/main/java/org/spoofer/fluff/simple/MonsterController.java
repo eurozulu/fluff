@@ -1,6 +1,6 @@
 package org.spoofer.fluff.simple;
 
-import org.spoofer.fluff.MovementEngine;
+import org.spoofer.fluff.Director;
 import org.spoofer.fluff.utils.ScheduledUpdater;
 
 public class MonsterController extends SimpleController {
@@ -12,8 +12,8 @@ public class MonsterController extends SimpleController {
         }
     }, 250);
 
-    public MonsterController(int id, MovementEngine movementEngine) {
-        super(id, movementEngine);
+    public MonsterController(int id, Director director) {
+        super(id, director);
     }
 
 

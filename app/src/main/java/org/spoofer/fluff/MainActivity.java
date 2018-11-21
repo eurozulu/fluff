@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import org.spoofer.fluff.simple.ButtonController;
 import org.spoofer.fluff.simple.MonsterController;
-import org.spoofer.fluff.simple.SimpleMovementEngine;
+import org.spoofer.fluff.simple.SimpleDirector;
 import org.spoofer.fluff.simple.SimpleScene;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final long DEBUG_UPDATE_TIME = 250;
 
-    private final MovementEngine movementEngine = new SimpleMovementEngine();
+    private final Director director = new SimpleDirector();
 
     private List<Controller> controllers = new ArrayList<>();
 
@@ -47,14 +47,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         ((SimpleScene) scene).loadScene((ViewGroup) findViewById(R.id.gameboard));
-        movementEngine.setScene(scene);
+        director.setScene(scene);
         uiHandler.postDelayed(debugUpdater, DEBUG_UPDATE_TIME);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        movementEngine.stopAll();
+        director.stopAll();
 
         uiHandler.removeCallbacks(debugUpdater);
     }
@@ -79,10 +79,10 @@ public class MainActivity extends AppCompatActivity {
                 debugTxt.setText(s.toString());
 
                 RadioButton ledOnAir = findViewById(R.id.led_onAir);
-                ledOnAir.setBackgroundColor(movementEngine.isPerforming() ? getColor(R.color.colourRed) : getColor(R.color.colourGreen));
+                ledOnAir.setBackgroundColor(director.isPerforming() ? getColor(R.color.colourRed) : getColor(R.color.colourGreen));
 
                 RadioButton ledInCollision = findViewById(R.id.led_inCollision);
-                ledInCollision.setBackgroundColor(movementEngine.isInCollision(R.id.bot_player) ?
+                ledInCollision.setBackgroundColor(director.isInCollision(R.id.bot_player) ?
                         getColor(R.color.colourRed) : getColor(R.color.colourGreen));
 
             } catch (Throwable e) {
@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private Controller createPlayerController() {
-        ButtonController controller = new ButtonController(R.id.bot_player, movementEngine);
+        ButtonController controller = new ButtonController(R.id.bot_player, director);
         controller.addButton(findViewById(R.id.btn_left), Movement.Direction.Left);
         controller.addButton(findViewById(R.id.btn_right), Movement.Direction.Right);
         controller.addButton(findViewById(R.id.btn_up), Movement.Direction.Up);
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             @IdRes int botId = bot.getView().getId();
             String name = resources.getResourceName(botId);
             if (null != name && name.contains("monster_red"))
-                controllers.add(new MonsterController(botId, movementEngine));
+                controllers.add(new MonsterController(botId, director));
         }
 
         return controllers;
