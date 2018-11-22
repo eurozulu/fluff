@@ -15,12 +15,16 @@ import org.spoofer.fluff.Movement;
 import org.spoofer.fluff.Scene;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class SimpleDirector implements Director {
 
     private final Map<Bot, Animator> performances = new HashMap<>();
     private final Map<Bot, Bot> collisions = new HashMap<>();
+
+    private final Set<CollisionListener> collisionListeners = new HashSet<>();
 
     private Scene scene;
 
@@ -33,8 +37,14 @@ public class SimpleDirector implements Director {
             return;
 
         Bot bot = scene.getBot(botId);
-        if (null != bot)
-            moveBotInside(bot, direction, scene.getSceneSize());
+        if (null == bot)
+            return;
+
+        Movement movement = moveBotInside(bot, direction, scene.getSceneSize());
+        if (movement.isStill())
+            return;
+
+        moveBot(bot, movement);
     }
 
 
@@ -70,9 +80,19 @@ public class SimpleDirector implements Director {
         return collisions.containsKey(bot);
     }
 
+
+    private void moveBot(Bot actor, Movement movement) {
+        stopBot(actor);
+        Animator animator = buildAnimator(actor, movement);
+        performances.put(actor, animator);
+
+        animator.start();
+    }
+
+
     // Move the bot to the opposite edge of the direction of travel.
     // i.e. if direction =Left, move to right side, if Up, move to Bottom.
-    private void moveBotOutside(Bot actor, Movement.Direction direction, Rect boundary) {
+    private Movement moveBotOutside(Bot actor, Movement.Direction direction, Rect boundary) {
 
         Rect botLoc = actor.getLocation();
         Rect newLoc = new Rect(botLoc);
@@ -94,14 +114,12 @@ public class SimpleDirector implements Director {
 
         Movement movement = new SimpleMovement(botLoc);
         movement.setEndLocation(newLoc);
-        if (movement.isStill())
-            return;
 
-        moveBot(actor, movement);
+        return movement;
     }
 
 
-    private void moveBotInside(Bot actor, Movement.Direction direction, Rect boundary) {
+    private Movement moveBotInside(Bot actor, Movement.Direction direction, Rect boundary) {
 
         int distance;
 
@@ -125,20 +143,9 @@ public class SimpleDirector implements Director {
                 distance = 0;
         }
 
-        Movement movement = new SimpleMovement(actor.getLocation(), direction, distance);
-        if (movement.isStill())
-            return;
-
-        moveBot(actor, movement);
+        return new SimpleMovement(actor.getLocation(), direction, distance);
     }
 
-    private void moveBot(Bot actor, Movement movement) {
-        stopBot(actor);
-        Animator animator = buildAnimator(actor, movement);
-        performances.put(actor, animator);
-
-        animator.start();
-    }
 
     private void stopBot(Bot bot) {
         Animator animator = performances.remove(bot);
@@ -249,4 +256,8 @@ public class SimpleDirector implements Director {
         return path;
     }
 
+    public interface CollisionListener {
+        void collisionStart(Bot actor, Bot target);
+        void collisionEnd(Bot actor, Bot target);
+    }
 }
