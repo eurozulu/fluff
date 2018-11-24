@@ -37,7 +37,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        scene = new SimpleScene();
+        scene = new SimpleScene(findViewById(R.id.gameboard));
+
         controllers.add(createPlayerController());
         controllers.addAll(getMonsterControllers(scene.getBots()));
     }
@@ -46,7 +47,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        ((SimpleScene) scene).loadScene((ViewGroup) findViewById(R.id.gameboard));
+
+        ((SimpleScene) scene).initalise();
         director.setScene(scene);
         uiHandler.postDelayed(debugUpdater, DEBUG_UPDATE_TIME);
     }

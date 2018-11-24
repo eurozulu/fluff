@@ -14,8 +14,8 @@ public class SimpleScenery extends SimpleBot implements Scenery {
     }
 
     @Override
-    public Movement getCollisionMovement(Bot actor, Movement movement) {
-        Movement moveTo = moveBotOutside(actor, movement.getDirection(), getLocation());
+    public Movement moveCollision(Bot actor, Movement actorMovement) {
+        Movement moveTo = moveBotOutside(actor, actorMovement.getDirection(), getLocation());
         return moveTo;
     }
 
@@ -29,6 +29,8 @@ public class SimpleScenery extends SimpleBot implements Scenery {
 
         if (!Rect.intersects(botLoc, boundary))
             return movement;
+
+        boundary.inset(-3, -3); // widen boundry to ensure player is not in collision after.
 
         Rect newLoc = new Rect(botLoc);
 

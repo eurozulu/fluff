@@ -13,18 +13,15 @@ import org.spoofer.fluff.Bot;
 import org.spoofer.fluff.Director;
 import org.spoofer.fluff.Movement;
 import org.spoofer.fluff.Scene;
+import org.spoofer.fluff.Scenery;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class SimpleDirector implements Director {
 
     private final Map<Bot, Animator> performances = new HashMap<>();
     private final Map<Bot, Bot> collisions = new HashMap<>();
-
-    private final Set<CollisionListener> collisionListeners = new HashSet<>();
 
     private Scene scene;
 
@@ -153,7 +150,7 @@ public class SimpleDirector implements Director {
             animator.cancel();
     }
 
-    private Animator buildAnimator(final Bot bot, final Movement movement) {
+    private Animator buildAnimator(final Bot bot, Movement movement) {
         ImageView view = bot.getView();
 
         if (movement.isStill())
@@ -168,15 +165,22 @@ public class SimpleDirector implements Director {
             propertyName = "translationY";
             endLocation = view.getTranslationY() + movement.getRelativeDistance();
         }
+
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, propertyName, endLocation);
+
+
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                Bot collision = checkCollision(bot, movement.getDirection());
+                Bot collision = checkCollision(bot);
                 if (null != collision) {
                     if (collisions.put(bot, collision) != collision)
-                        moveBotOutside(bot, movement.getDirection(), collision.getLocation());
+                        if (collision instanceof Scenery) {
+                            Movement newMovement = ((Scenery) collision).moveCollision(bot, movement);
+                            if (newMovement != movement)
+                                moveBot(bot, newMovement);
+                        }
 
                 } else if (movement.getDirection() != Movement.Direction.Stop)
                     collisions.remove(bot);
@@ -196,9 +200,18 @@ public class SimpleDirector implements Director {
         return animator;
     }
 
-    private Bot checkCollision(Bot actor, Movement.Direction direction) {
-        Bot nextCollided = getNextCollision(actor, direction);
-        return null != nextCollided && nextCollided.getLocation().intersect(actor.getLocation()) ? nextCollided : null;
+    private Bot checkCollision(Bot actor) {
+        Bot found = null;
+
+        Rect actorLocation = actor.getLocation();
+
+        for (Bot bot : scene.getBots()) {
+            if (Rect.intersects(bot.getLocation(), actorLocation)) {
+                found = bot;
+                break;
+            }
+        }
+        return found;
     }
 
     /**
@@ -207,57 +220,55 @@ public class SimpleDirector implements Director {
      * @param actor
      * @param direction
      * @return
-     */
+     * /
     private Bot getNextCollision(Bot actor, Movement.Direction direction) {
 
-        // Find closest bot, in the direction of travel;
-        Bot closestBot = null;
-        Movement closest = null;
-        Rect widenedLoc = actor.getLocation();
-        //widenedLoc.inset(-10, -10);
-        Movement movement = new SimpleMovement(actor.getLocation());
+    // Find closest bot, in the direction of travel;
+    Bot closestBot = null;
+    Movement closest = null;
+    Rect widenedLoc = actor.getLocation();
+    //widenedLoc.inset(-10, -10);
+    Movement movement = new SimpleMovement(actor.getLocation());
 
-        Rect actorPath = calculatePath(widenedLoc, direction);
+    Rect actorPath = calculatePath(widenedLoc, direction);
 
-        for (Bot bot : scene.getBots()) {
-            if (bot == actor)
-                continue;
+    for (Bot bot : scene.getBots()) {
+    if (bot == actor)
+    continue;
 
-            Rect botLoc = bot.getLocation();
-            if (botLoc.intersects(botLoc, actorPath)) {
-                movement.setEndLocation(botLoc);
-                if (null == closest || closest.getDistance() > movement.getDistance()) {
-                    closest = new SimpleMovement(movement);
-                    closestBot = bot;
-                }
-            }
-        }
-        return closestBot;
+    Rect botLoc = bot.getLocation();
+    if (botLoc.intersects(botLoc, actorPath)) {
+    movement.setEndLocation(botLoc);
+    if (null == closest || closest.getDistance() > movement.getDistance()) {
+    closest = new SimpleMovement(movement);
+    closestBot = bot;
+    }
+    }
+    }
+    return closestBot;
     }
 
 
     private Rect calculatePath(Rect start, Movement.Direction direction) {
-        Rect sceneLoc = scene.getSceneSize();
-        Rect path = new Rect(start);
-        switch (direction) {
-            case Left:
-                path.left = sceneLoc.left;
-                break;
-            case Right:
-                path.right = sceneLoc.right;
-                break;
-            case Down:
-                path.bottom = sceneLoc.bottom;
-                break;
-            case Up:
-                path.top = sceneLoc.top;
-                break;
-        }
-        return path;
+    Rect sceneLoc = scene.getSceneSize();
+    Rect path = new Rect(start);
+    switch (direction) {
+    case Left:
+    path.left = sceneLoc.left;
+    break;
+    case Right:
+    path.right = sceneLoc.right;
+    break;
+    case Down:
+    path.bottom = sceneLoc.bottom;
+    break;
+    case Up:
+    path.top = sceneLoc.top;
+    break;
+    }
+    return path;
     }
 
-    public interface CollisionListener {
-        void collisionStart(Bot actor, Bot target);
-        void collisionEnd(Bot actor, Bot target);
-    }
+     */
+
 }
