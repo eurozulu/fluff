@@ -17,7 +17,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/monster_red"
-        android:tag="bot.monster_red"
         android:translationX="200dp" />
 
     <LinearLayout
@@ -39,8 +38,7 @@
                 android:id="@+id/bot_floor_1_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/floortile"
-                android:tag="bot.floor" />
+                android:src="@drawable/floortile" />
 
             <ImageView
                 android:id="@+id/bot_floor_1_2"
@@ -48,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/floortile"
                 android:layout_marginLeft="50dp"
-                android:tag="bot.floor" />
+                 />
 
         </LinearLayout>
 
@@ -63,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/floortile_medium"
                 android:translationX="100dp"
-                android:tag="bot.floor" />
+                 />
 
         </LinearLayout>
 
@@ -78,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/floortile_large"
                 android:translationX="200dp"
-                android:tag="bot.floor" />
+                 />
 
         </LinearLayout>
     </LinearLayout>
