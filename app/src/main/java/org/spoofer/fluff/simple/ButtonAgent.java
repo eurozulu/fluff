@@ -7,9 +7,9 @@ import org.spoofer.fluff.Movement;
 import org.spoofer.fluff.Director;
 import org.spoofer.fluff.R;
 
-public class ButtonController extends SimpleController {
+public class ButtonAgent extends SimpleAgent {
 
-    public ButtonController(int id, Director director) {
+    public ButtonAgent(int id, Director director) {
         super(id, director);
     }
 
@@ -19,11 +19,11 @@ public class ButtonController extends SimpleController {
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN: {
-                        getDirector().moveBot(R.id.bot_player, direction);
+                        ButtonAgent.this.move(direction);
                         break;
                     }
                     case MotionEvent.ACTION_UP: {
-                        getDirector().stopBot(R.id.bot_player);
+                        ButtonAgent.this.move(Movement.Direction.Stop);
                     }
                     default:
                         return false;

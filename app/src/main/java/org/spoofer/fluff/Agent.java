@@ -2,7 +2,7 @@ package org.spoofer.fluff;
 
 import android.support.annotation.IdRes;
 
-public interface Controller {
+public interface Agent {
 
     @IdRes int getBotId();
 

@@ -1,19 +1,18 @@
 package org.spoofer.fluff;
 
-import android.support.annotation.IdRes;
-
 public interface Director {
 
 
-    void moveBot(@IdRes int botId, Movement.Direction direction);
+    void moveBot(Agent agent, Movement.Direction direction);
+    void moveBot(Agent agent, Movement movement);
 
-    void stopBot(@IdRes int botId);
+    void stopBot(Agent agent);
 
     void stopAll();
 
     void setScene(Scene scene);
 
-    boolean isPerforming();
-    boolean isInCollision(@IdRes int id);
+    boolean isPerforming(Agent agent);
+    boolean isInCollision(Agent agent);
 
 }

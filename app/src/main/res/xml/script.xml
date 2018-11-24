@@ -49,7 +49,7 @@
             <frame id="@drawable/player_down3" />
         </action>
     </bot>
-    <bot id="@id/monster_red">
+    <bot id="@id/bot_monster_red">
         <action name="Stop">
             <frame id="@drawable/monster_red" />
         </action>

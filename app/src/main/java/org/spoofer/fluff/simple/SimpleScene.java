@@ -73,11 +73,12 @@ public class SimpleScene implements Scene {
     }
 
     private Bot createBotFromView(View view) {
-        if (!(view instanceof ImageView))
-            return null;
 
         int id = view.getId();
         if (id == View.NO_ID || id == 0)
+            return null;
+
+        if (!(view instanceof ImageView))
             return null;
 
         Resources resources = view.getResources();
@@ -88,7 +89,7 @@ public class SimpleScene implements Scene {
 
         try {
             Class<? extends Bot> botClass = Class.forName(className).asSubclass(Bot.class);
-            Constructor<? extends Bot> constructor = botClass.getConstructor(View.class);
+            Constructor<? extends Bot> constructor = botClass.getConstructor(ImageView.class);
 
             return constructor.newInstance(view);
 
@@ -107,7 +108,18 @@ public class SimpleScene implements Scene {
     }
 
     private String lookupStringByName(String name, Resources resources) {
-        int id = resources.getIdentifier(name, "string", PACKAGE_NAME);
+        StringBuilder s = new StringBuilder(name);
+        int id = 0;
+        while (id == 0 && s.length() > 0) {
+            id = resources.getIdentifier(s.toString(), "string", PACKAGE_NAME);
+            if (id == 0) {
+                int lastDash = s.lastIndexOf("_");
+                if (lastDash < 0)
+                    lastDash = 0;
+                s.delete(lastDash, s.length());
+            }
+
+        }
         return id != 0 ? resources.getString(id) : null;
 
     }

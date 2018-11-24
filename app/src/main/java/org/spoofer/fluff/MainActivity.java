@@ -7,12 +7,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.IdRes;
 import android.support.v7.app.AppCompatActivity;
-import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import org.spoofer.fluff.simple.ButtonController;
-import org.spoofer.fluff.simple.MonsterController;
+import org.spoofer.fluff.simple.ButtonAgent;
+import org.spoofer.fluff.simple.MonsterAgent;
 import org.spoofer.fluff.simple.SimpleDirector;
 import org.spoofer.fluff.simple.SimpleScene;
 
@@ -26,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final Director director = new SimpleDirector();
 
-    private List<Controller> controllers = new ArrayList<>();
+    private Agent agent;
 
     private Scene scene;
 
@@ -39,8 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         scene = new SimpleScene(findViewById(R.id.gameboard));
 
-        controllers.add(createPlayerController());
-        controllers.addAll(getMonsterControllers(scene.getBots()));
+        agent = createPlayerController();
     }
 
 
@@ -81,10 +79,10 @@ public class MainActivity extends AppCompatActivity {
                 debugTxt.setText(s.toString());
 
                 RadioButton ledOnAir = findViewById(R.id.led_onAir);
-                ledOnAir.setBackgroundColor(director.isPerforming() ? getColor(R.color.colourRed) : getColor(R.color.colourGreen));
+                ledOnAir.setBackgroundColor(director.isPerforming(agent) ? getColor(R.color.colourRed) : getColor(R.color.colourGreen));
 
                 RadioButton ledInCollision = findViewById(R.id.led_inCollision);
-                ledInCollision.setBackgroundColor(director.isInCollision(R.id.bot_player) ?
+                ledInCollision.setBackgroundColor(director.isInCollision(agent) ?
                         getColor(R.color.colourRed) : getColor(R.color.colourGreen));
 
             } catch (Throwable e) {
@@ -96,8 +94,8 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    private Controller createPlayerController() {
-        ButtonController controller = new ButtonController(R.id.bot_player, director);
+    private Agent createPlayerController() {
+        ButtonAgent controller = new ButtonAgent(R.id.bot_player, director);
         controller.addButton(findViewById(R.id.btn_left), Movement.Direction.Left);
         controller.addButton(findViewById(R.id.btn_right), Movement.Direction.Right);
         controller.addButton(findViewById(R.id.btn_up), Movement.Direction.Up);
@@ -105,18 +103,18 @@ public class MainActivity extends AppCompatActivity {
         return controller;
     }
 
-    private List<Controller> getMonsterControllers(Collection<Bot> bots) {
+    private List<Agent> getMonsterControllers(Collection<Bot> bots) {
         Resources resources = getResources();
-        List<Controller> controllers = new ArrayList<>();
+        List<Agent> agents = new ArrayList<>();
 
         for (Bot bot : bots) {
             @IdRes int botId = bot.getView().getId();
             String name = resources.getResourceName(botId);
             if (null != name && name.contains("monster_red"))
-                controllers.add(new MonsterController(botId, director));
+                agents.add(new MonsterAgent(botId, director));
         }
 
-        return controllers;
+        return agents;
     }
 
 }

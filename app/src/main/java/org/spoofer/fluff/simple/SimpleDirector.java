@@ -9,31 +9,35 @@ import android.support.annotation.IdRes;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 
+import org.spoofer.fluff.Agent;
 import org.spoofer.fluff.Bot;
 import org.spoofer.fluff.Director;
 import org.spoofer.fluff.Movement;
 import org.spoofer.fluff.Scene;
 import org.spoofer.fluff.Scenery;
+import org.spoofer.fluff.SpecialAgent;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class SimpleDirector implements Director {
 
-    private final Map<Bot, Animator> performances = new HashMap<>();
+    private final Map<Agent, Animator> performances = new HashMap<>();
     private final Map<Bot, Bot> collisions = new HashMap<>();
 
     private Scene scene;
 
 
-    public void moveBot(@IdRes int botId, Movement.Direction direction) {
+    public void moveBot(Agent agent, Movement.Direction direction) {
         if (direction == Movement.Direction.Stop)
-            stopBot(botId);
+            stopBot(agent);
 
         if (null == scene)
             return;
 
-        Bot bot = scene.getBot(botId);
+        Bot bot = scene.getBot(agent.getBotId());
         if (null == bot)
             return;
 
@@ -41,15 +45,16 @@ public class SimpleDirector implements Director {
         if (movement.isStill())
             return;
 
-        moveBot(bot, movement);
+        moveBot(agent, movement);
     }
 
 
-    public void stopBot(@IdRes int botId) {
-        Bot bot = null != scene ? scene.getBot(botId) : null;
-        if (null != bot)
-            stopBot(bot);
+    public void stopBot(Agent agent) {
+        Animator animator = performances.remove(agent);
+        if (null != animator)
+            animator.cancel();
     }
+
 
     public void stopAll() {
         for (Animator animator : performances.values()) {
@@ -57,7 +62,6 @@ public class SimpleDirector implements Director {
         }
         performances.clear();
         collisions.clear();
-        scene = null;
     }
 
     public void setScene(Scene scene) {
@@ -67,23 +71,69 @@ public class SimpleDirector implements Director {
     }
 
 
-    public boolean isPerforming() {
-        return !performances.isEmpty();
+    @Override
+    public boolean isPerforming(Agent agent) {
+        Bot bot = scene.getBot(agent.getBotId());
+        return performances.containsKey(agent);
+    }
+
+
+    public boolean isPerforming(@IdRes int botId) {
+        for (Agent agent : performances.keySet())
+            if (agent.getBotId() == botId) {
+                return true;
+            }
+        return false;
     }
 
     @Override
-    public boolean isInCollision(@IdRes int id) {
-        Bot bot = scene.getBot(id);
+    public boolean isInCollision(Agent agent) {
+        Bot bot = scene.getBot(agent.getBotId());
         return collisions.containsKey(bot);
     }
 
 
-    private void moveBot(Bot actor, Movement movement) {
-        stopBot(actor);
-        Animator animator = buildAnimator(actor, movement);
-        performances.put(actor, animator);
+
+    @Override
+    public void moveBot(Agent agent, Movement movement) {
+
+        if (agent instanceof SpecialAgent)
+            haltBot(agent.getBotId());
+        else {
+            stopBot(agent);
+
+            if (isPerforming(agent.getBotId())) // Check actor not performing after stop, i.e. for another agent
+                return;
+        }
+
+        Bot bot = scene.getBot(agent.getBotId());
+        if (null == bot)
+            return;
+
+        ValueAnimator animator = buildAnimator(bot.getView(), movement);
+        animator.addListener(getEndListener(agent));
+        animator.addUpdateListener(getCollisionListener(bot));
+
+        performances.put(agent, animator);
 
         animator.start();
+    }
+
+    /**
+     * Stops Any performance with the given actor, regardless of the Agent.
+     * @param botId
+     */
+    private void haltBot(@IdRes int botId) {
+        Set<Agent> toRemove = new HashSet<>();
+        for (Map.Entry<Agent, Animator> entry : performances.entrySet()) {
+            if (entry.getKey().getBotId() == botId) {
+                entry.getValue().cancel();
+                toRemove.add(entry.getKey());
+            }
+        }
+        for (Agent agent : toRemove)
+            performances.remove(agent);
+
     }
 
 
@@ -144,14 +194,28 @@ public class SimpleDirector implements Director {
     }
 
 
-    private void stopBot(Bot bot) {
-        Animator animator = performances.remove(bot);
-        if (null != animator)
-            animator.cancel();
+    private void collideBot(Bot actor, Bot target) {
+        Bot collided = collisions.get(actor);
+        if (target != collided) {
+            decollideBot(actor);
+            collisions.put(actor, target);
+            if (target instanceof Scenery)
+                ((Scenery) target).notifyCollision(actor, this);
+        }
+    }
+    private void decollideBot(Bot actor) {
+        Bot target = collisions.remove(actor);
+//        if (null != target && target instanceof Scenery)
+  //          ((Scenery) target).notifyDecollision(ac`)
     }
 
-    private Animator buildAnimator(final Bot bot, Movement movement) {
-        ImageView view = bot.getView();
+    /**
+     * Build a movement Animator for the given View.
+     * @param view
+     * @param movement
+     * @return
+     */
+    private ValueAnimator buildAnimator(ImageView view, Movement movement) {
 
         if (movement.isStill())
             return null;
@@ -167,37 +231,39 @@ public class SimpleDirector implements Director {
         }
 
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, propertyName, endLocation);
+        animator.setDuration(movement.getDuration());
+        animator.setInterpolator(new LinearInterpolator());
 
+        return animator;
+    }
 
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    /**
+     * Gets the Collison listener to attach to each Animator
+     * @return
+     */
+    private ValueAnimator.AnimatorUpdateListener getCollisionListener(final Bot bot) {
+        return new ValueAnimator.AnimatorUpdateListener() {
 
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 Bot collision = checkCollision(bot);
                 if (null != collision) {
-                    if (collisions.put(bot, collision) != collision)
-                        if (collision instanceof Scenery) {
-                            Movement newMovement = ((Scenery) collision).moveCollision(bot, movement);
-                            if (newMovement != movement)
-                                moveBot(bot, newMovement);
-                        }
+                    collideBot(bot, collision);
 
-                } else if (movement.getDirection() != Movement.Direction.Stop)
-                    collisions.remove(bot);
+                } else if (collisions.containsKey(bot)) {
+                    decollideBot(bot);
+                }
             }
-        });
+        };
+    }
 
-        animator.addListener(new AnimatorListenerAdapter() {
+    private Animator.AnimatorListener getEndListener(final Agent agent) {
+        return new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                performances.remove(bot);
-
+                performances.remove(agent);
             }
-        });
-
-        animator.setDuration(movement.getDuration());
-        animator.setInterpolator(new LinearInterpolator());
-        return animator;
+        };
     }
 
     private Bot checkCollision(Bot actor) {
@@ -206,6 +272,9 @@ public class SimpleDirector implements Director {
         Rect actorLocation = actor.getLocation();
 
         for (Bot bot : scene.getBots()) {
+            if (bot == actor) // Don't bump into yourself!!
+                continue;
+
             if (Rect.intersects(bot.getLocation(), actorLocation)) {
                 found = bot;
                 break;
@@ -213,6 +282,7 @@ public class SimpleDirector implements Director {
         }
         return found;
     }
+
 
     /**
      * Gets the next bot the given actor will collide with
